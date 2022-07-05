@@ -1,49 +1,31 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.AspNetCore.SignalR.Client;
+using SignalRClient.SignalRConnection;
 
-namespace Client;
+namespace SignalRClient;
 
 public partial class MainWindow : Window
 {
-    readonly HubConnection _connection;
+    private readonly HubConnection _connection;
+
     public MainWindow()
     {
-        InitializeComponent();
+        var startConnection = new StartConnection();
+        _connection = startConnection.Start();
 
-        _connection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:5094/chatHub")
-            .Build();
-
-        // When connection is closed (disconnected) wait delay before start
-        _connection.Closed += async (_) =>
-        {
-            await Task.Delay(new Random().Next(0, 5) * 1000);
-            await _connection.StartAsync();
-        };
- 
-          _connection.On<string, string>("ReceiveMessage", (user, message) =>
+        _connection.On<string,string>("ReceiveMessage", (user,message) =>
         {
             this.Dispatcher.Invoke(() =>
             {
-                var newMessage = $"{user}: {message}";
-                messagesList.Items.Add(newMessage);
+                var formattedMessage = $"{user}: {message}";
+                Console.WriteLine(formattedMessage);
+                messagesList.Items.Add(formattedMessage);
+
             });
         });
-
-        try
-        {
-            _connection.StartAsync();
-            messagesList.Items.Add("Connection started");
-            sendButton.IsEnabled = true;
-        }
-        catch (Exception ex)
-        {
-            messagesList.Items.Add(ex.Message);
-        }
     }
-
+    //dispose ??
     private async void sendButton_Click(object sender, RoutedEventArgs e)
     {
         try

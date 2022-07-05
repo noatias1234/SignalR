@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace SignalRServer
+namespace SignalRServer;
+
+public class ChatHub : Hub // Hub class manages connections, groups, and messaging
 {
-    public class ChatHub : Hub // Hub class manages connections, groups, and messaging
+    public async Task SendMessage(string user,string message) // Called by connected client to send message to all clients
     {
-        public async Task SendMessage(string user, string message)
-        {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
-        }
+        await Clients.All.SendAsync("ReceiveMessage", user, message); // "ReceiveMessage" is the msg type that all connected clients will receive
     }
 }
